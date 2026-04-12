@@ -1,0 +1,46 @@
+# ── Part I: Containerized Deployment ─────────────────────────────────────────
+# Usage:  docker compose up -d
+# Web app served at http://<EC2-PUBLIC-IP>:3000
+#
+# The web service uses the pre-built image from Docker Hub.
+# The MongoDB service uses a named volume so data survives container restarts.
+
+version: '3.8'
+
+services:
+
+  # ── Web Application ──────────────────────────────────────────────────────────
+  web:
+    image: ishahzaibhaider/devops-assign2:latest   # image pushed to Docker Hub
+    container_name: student_records_web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/student_records
+      - PORT=3000
+    depends_on:
+      - mongo
+    networks:
+      - app_network
+
+  # ── MongoDB Database ─────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:6
+    container_name: student_records_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db        # named volume — data persists across restarts
+    networks:
+      - app_network
+
+# ── Named Volumes ────────────────────────────────────────────────────────────
+volumes:
+  mongo_data:                      # Docker manages this volume on the host
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  app_network:
+    driver: bridge

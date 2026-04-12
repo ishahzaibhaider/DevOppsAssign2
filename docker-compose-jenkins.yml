@@ -1,0 +1,50 @@
+# ── Part II: Jenkins CI Build ─────────────────────────────────────────────────
+# This file is used by the Jenkins pipeline (Jenkinsfile).
+# Key differences from Part I docker-compose.yml:
+#   1. No Dockerfile build — base node image is used with a bind-mount for code
+#   2. Different container names  (avoid conflict with Part I deployment)
+#   3. Different host port numbers (3001 / 27018 instead of 3000 / 27017)
+
+version: '3.8'
+
+services:
+
+  # ── Web Application ──────────────────────────────────────────────────────────
+  web_ci:
+    image: node:18-alpine
+    container_name: student_records_web_ci
+    working_dir: /app
+    command: sh -c "npm install && node app.js"
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo_ci:27017/student_records_ci
+      - PORT=3000
+    volumes:
+      - .:/app                         # bind-mount: code from workspace, no Dockerfile
+    depends_on:
+      - mongo_ci
+    networks:
+      - ci_network
+
+  # ── MongoDB Database ─────────────────────────────────────────────────────────
+  mongo_ci:
+    image: mongo:6
+    container_name: student_records_mongo_ci
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data_ci:/data/db         # named volume for CI database persistence
+    networks:
+      - ci_network
+
+# ── Named Volumes ────────────────────────────────────────────────────────────
+volumes:
+  mongo_data_ci:
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  ci_network:
+    driver: bridge

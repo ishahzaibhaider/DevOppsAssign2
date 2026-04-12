@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+<% if (message) { %>
+  <div class="alert"><%= message %></div>
+<% } %>
+
+<section class="card">
+  <div class="card-header">
+    <h2>All Students (<%= students.length %>)</h2>
+    <a href="/add" class="btn btn-primary">+ Add Student</a>
+  </div>
+
+  <% if (students.length === 0) { %>
+    <p class="empty">No student records yet. <a href="/add">Add the first one.</a></p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Roll No.</th>
+          <th>Course</th>
+          <th>Marks</th>
+          <th>Grade</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% students.forEach((s, i) => {
+          let grade = 'F';
+          if (s.marks >= 90) grade = 'A+';
+          else if (s.marks >= 80) grade = 'A';
+          else if (s.marks >= 70) grade = 'B';
+          else if (s.marks >= 60) grade = 'C';
+          else if (s.marks >= 50) grade = 'D';
+        %>
+        <tr>
+          <td><%= i + 1 %></td>
+          <td><%= s.name %></td>
+          <td><%= s.rollNumber %></td>
+          <td><%= s.course %></td>
+          <td><%= s.marks %></td>
+          <td class="grade grade-<%= grade.replace('+','plus') %>"><%= grade %></td>
+          <td>
+            <form action="/<%= s._id %>?_method=DELETE" method="POST"
+                  onsubmit="return confirm('Delete this record?')">
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+  </main>
+  <footer>DevOps Assignment 2 &mdash; COMSATS University Islamabad</footer>
+</body>
+</html>
