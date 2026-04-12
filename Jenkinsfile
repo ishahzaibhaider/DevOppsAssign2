@@ -46,8 +46,8 @@ pipeline {
             steps {
                 echo "Deploying with ${COMPOSE_FILE}..."
                 sh """
-                    docker compose -f ${COMPOSE_FILE} down --remove-orphans || true
-                    docker compose -f ${COMPOSE_FILE} up -d --build
+                    docker-compose -f ${COMPOSE_FILE} down --remove-orphans || true
+                    docker-compose -f ${COMPOSE_FILE} up -d --build
                 """
                 echo "Deployment started."
             }
@@ -57,7 +57,7 @@ pipeline {
         stage('Verify') {
             steps {
                 echo "Verifying containers are running..."
-                sh 'docker compose -f ${COMPOSE_FILE} ps'
+                sh 'docker-compose -f ${COMPOSE_FILE} ps'
                 // Give the app a moment to start, then hit the health endpoint
                 sh 'sleep 5 && curl -sf http://localhost:3001/health || echo "Health check failed"'
             }
@@ -70,7 +70,7 @@ pipeline {
         }
         failure {
             echo "Pipeline FAILED. Check console output above."
-            sh 'docker compose -f ${COMPOSE_FILE} logs --tail=50 || true'
+            sh 'docker-compose -f ${COMPOSE_FILE} logs --tail=50 || true'
         }
         always {
             echo "Build #${BUILD_NUMBER} finished with status: ${currentBuild.currentResult}"
